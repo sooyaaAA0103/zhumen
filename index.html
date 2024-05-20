@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>520 Surprise</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('starry-sky.jpg') no-repeat center center fixed;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes dance {
+            0%, 100% { transform: translateY(-50%) scale(1) rotate(0deg); }
+            25% { transform: translateY(-45%) scale(1.1) rotate(10deg); }
+            50% { transform: translateY(-50%) scale(1) rotate(0deg); }
+            75% { transform: translateY(-55%) scale(1.1) rotate(-10deg); }
+        }
+
+        .star {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: white;
+            box-shadow: 0 0 5px 2px white;
+            border-radius: 50%;
+            animation: flicker 1.5s infinite alternate;
+            z-index: -1;
+        }
+
+        .title-container {
+            margin-bottom: 20px;
+            z-index: 5;
+        }
+
+        .title {
+            font-size: 3em;
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .door {
+            position: absolute;
+            width: 50%;
+            height: 80%;
+            transition: all 1s;
+            z-index: 2;
+            background-size: 100% 100%;
+        }
+
+        .left-door {
+            left: 0;
+            transform-origin: left;
+            background-image: url('door1.png');
+            background-position: left;
+        }
+
+        .right-door {
+            right: 0;
+            transform-origin: right;
+            background-image: url('door2.png');
+            background-position: right;
+        }
+
+        .pigs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 3;
+        }
+
+        .pig {
+            width: 110px;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: all 1s;
+        }
+
+        .pig-left {
+            transform: translate(-60%, -50%) scale(0); /* 调整位置向左移动 */
+        }
+
+        .pig-right {
+            transform: translate(-40%, -50%) scale(0); /* 调整位置向左移动 */
+        }
+
+        .heart {
+            font-size: 300px;
+            color: red;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 4;
+            cursor: pointer;
+            pointer-events: none; /* 禁止点击事件 */
+        }
+
+        .message {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 4;
+        }
+
+        .message h2 {
+            font-size: 2em;
+            color: white;
+        }
+
+        .show-pig .pig-left {
+            top: calc(50% + 50px);
+            left: 10px; /* 调整位置向左移动 */
+            transform: translateY(-50%) scale(1);
+            opacity: 1;
+        }
+
+        .show-pig .pig-right {
+            top: calc(50% + 50px);
+            left: calc(100% - 120px); /* 调整位置向左移动 */
+            transform: translateY(-50%) scale(1);
+            opacity: 1;
+        }
+
+        .dance .pig-left, .dance .pig-right {
+            animation: dance 2s infinite;
+        }
+
+        .open .left-door {
+            transform: rotateY(-90deg);
+        }
+
+        .open .right-door {
+            transform: rotateY(90deg);
+        }
+
+        .open .heart {
+            opacity: 1;
+            pointer-events: auto; /* 恢复点击事件 */
+        }
+
+        .open .message {
+            opacity: 1;
+        }
+
+        .new-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('xinyue.jpg') no-repeat center center fixed;
+            background-size: cover;
+            z-index: 5;
+        }
+
+        .show-new-screen .new-screen {
+            display: block;
+        }
+
+        @keyframes floatPhoto {
+            0% {
+                opacity: 0;
+                transform: translate(0, 300px) scale(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(0, -100px) scale(1);
+            }
+        }
+
+        @keyframes fallPhoto {
+            0% {
+                opacity: 1;
+                transform: translate(0, -100px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, 300px) scale(0);
+            }
+        }
+
+        .photo {
+            position: absolute;
+            width: 400px; /* 增加照片的大小 */
+            height: 400px;
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 6; /* 确保照片在新画面的上层 */
+        }
+
+        .animate-photo {
+            animation: floatPhoto 3s forwards; /* 加快动画速度 */
+        }
+
+        .fall-photo {
+            animation: fallPhoto 3s forwards; /* 加快动画速度 */
+        }
+
+        .new-pigs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 6;
+        }
+
+        .new-pig-left {
+            position: absolute;
+            left: 35%;
+            top: 25%; /* 调整位置向上 */
+            width: 110px;
+            height: auto;
+            animation: dance 2s infinite;
+        }
+
+        .new-pig-right {
+            position: absolute;
+            right: 35%;
+            top: 25%; /* 调整位置向上 */
+            width: 110px;
+            height: auto;
+            animation: dance 2s infinite;
+        }
+
+        .shrink-pig {
+            animation: shrink-into-heart 1s forwards; /* 缩小进入爱心动画 */
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title">猪门</h1>
+    </div>
+    <div class="container">
+        <div class="door left-door"></div>
+        <div class="door right-door"></div>
+        <div class="pigs">
+            <img src="pig1.png" alt="Pig 1" class="pig pig-left">
+            <img src="pig2.png" alt="Pig 2" class="pig pig-right">
+        </div>
+        <div class="heart">&#10084;</div>
+        <div class="message">
+            <h2>520快乐</h2>
+        </div>
+    </div>
+    <div class="new-screen">
+        <div class="new-pigs">
+            <img src="pig1.png" alt="Pig 1" class="new-pig-left">
+            <img src="pig2.png" alt="Pig 2" class="new-pig-right">
+        </div>
+    </div>
+    <audio id="bg-music" src="zhumen.mp3" loop></audio>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.container');
+            const heart = document.querySelector('.heart');
+            const body = document.body;
+            const newScreen = document.querySelector('.new-screen');
+            const bgMusic = document.getElementById('bg-music');
+
+            // 动态生成星星
+            const numberOfStars = 200;
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                body.appendChild(star);
+            }
+
+            // 小猪从门里慢慢出现
+            setTimeout(() => {
+                container.classList.add('show-pig');
+                setTimeout(() => {
+                    container.classList.add('dance');
+                }, 500); // 2秒后小猪开始跳舞
+            }, 500); // 1秒后小猪开始出现
+
+            container.addEventListener('click', (event) => {
+                container.classList.add('open');
+            });
+
+            // 点击爱心显示新画面并播放音乐
+            heart.addEventListener('click', (event) => {
+                event.stopPropagation(); // 阻止点击事件传播到container
+                
+                // 小猪缩小进入爱心动画
+                const pigs = document.querySelectorAll('.pig');
+                pigs.forEach(pig => {
+                    pig.classList.add('shrink-pig');
+                });
+
+                // 确保小猪缩小进入爱心动画完成后再显示新画面并播放音乐
+                setTimeout(() => {
+                    body.classList.add('show-new-screen');
+                    bgMusic.play(); // 播放背景音乐
+
+                    // 添加照片飘出效果
+                    const photos = ['begin.jpg', 'second.jpg', 'third.jpg', 'fourth.jpg', 'fifth.jpg', 'sixth.jpg', 'seventh.jpg', 'eighth.jpg', 'ninth.jpg', 'nineth.jpg', 'teneth.jpg', 'tenth.jpg', 'eleoneth.jpg', 'twelveth.jpg', 'thirdteenth.jpg', 'last.jpg','pigforver.jpg']; // 你的照片文件名列表
+                    let currentPhotoIndex = 0;
+                    const displayPhoto = () => {
+                        const previousPhoto = newScreen.querySelector('.photo');
+                        if (previousPhoto) {
+                            previousPhoto.classList.add('fall-photo');
+                            setTimeout(() => {
+                                previousPhoto.remove();
+                            }, 3000); // 确保下坠动画完成后再移除
+                        }
+
+                        const photo = photos[currentPhotoIndex];
+                        const img = document.createElement('img');
+                        img.src = photo;
+                        img.classList.add('photo');
+                        img.style.left = `calc(50% - 200px)`; // 照片居中
+                        img.style.top = `calc(70% - 200px)`; // 照片从中下部分出现
+                        newScreen.appendChild(img);
+
+                        // 添加动画类以启动动画
+                        img.classList.add('animate-photo');
+
+                        currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+
+                        setTimeout(displayPhoto, 12900); // 每12秒显示下一张照片
+                    };
+
+                    displayPhoto();
+                }, 1000); // 确保动画完成
+            });
+        });
+    </script>
+</body>
+</html>
